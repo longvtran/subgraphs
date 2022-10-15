@@ -32,7 +32,7 @@ import {
   RAD,
   ProtocolSideRevenueType,
 } from "./constants";
-import { createEventID } from "../utils/strings";
+import { createEventID, getDateXDaysAheadInUTC, getISODateStringInUTC, getISODateTimeStartOfDayStringInUTC } from "../utils/strings";
 import { bigIntToBDUseDecimals, bigIntChangeDecimals } from "../utils/numbers";
 import { Vat } from "../../generated/Vat/Vat";
 import { DAI } from "../../generated/Vat/DAI";
@@ -420,29 +420,27 @@ export function updateUsageMetrics(
       usageDailySnapshot.cumulativeUniqueUsers += 1;
     }
 
-    let hours: i64 = event.block.timestamp.toI64() / SECONDS_PER_HOUR;
-    let hourlyActiveAcctountID = "hourly-"
-      .concat(accountID)
-      .concat("-")
-      .concat(hours.toString());
-    let hourlyActiveAccount = ActiveAccount.load(hourlyActiveAcctountID);
-    if (hourlyActiveAccount == null) {
-      hourlyActiveAccount = new ActiveAccount(hourlyActiveAcctountID);
-      hourlyActiveAccount.save();
+    const timestamp = event.block.timestamp.toI64();
+    const timestampInMilliseconds = timestamp * 1000;
+    const days: i64 = timestamp / SECONDS_PER_DAY;
 
-      usageHourlySnapshot.hourlyActiveUsers += 1;
-    }
 
-    let days: i64 = event.block.timestamp.toI64() / SECONDS_PER_DAY;
-    let dailyActiveAcctountID = "daily-"
+    const date = new Date(timestampInMilliseconds);
+    const next_date = getDateXDaysAheadInUTC(1, date);
+    const datetime_start = getISODateTimeStartOfDayStringInUTC(date);
+    const datetime_end = getISODateTimeStartOfDayStringInUTC(next_date);
+
+    let dailyActiveAccountId = "daily-"
       .concat(accountID)
       .concat("-")
       .concat(days.toString());
-    let dailyActiveAccount = ActiveAccount.load(dailyActiveAcctountID);
+    let dailyActiveAccount = ActiveAccount.load(dailyActiveAccountId);
     if (dailyActiveAccount == null) {
-      dailyActiveAccount = new ActiveAccount(dailyActiveAcctountID);
+      dailyActiveAccount = new ActiveAccount(dailyActiveAccountId);
+      dailyActiveAccount.account_id = accountID;
+      dailyActiveAccount.datetime_start = datetime_start;
+      dailyActiveAccount.datetime_end = datetime_end;
       dailyActiveAccount.save();
-
       usageDailySnapshot.dailyActiveUsers += 1;
     }
   }

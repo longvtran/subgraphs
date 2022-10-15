@@ -1069,6 +1069,10 @@ type Account @entity {
 type ActiveAccount @entity {
   " { daily/hourly }-{ Address of the account }-{ Days/hours since Unix epoch } "
   id: ID!
+  " Address of the account "
+  account_id: ID
+  datetime_start: String # AWS DateTime format, in UTC (2022-12-25T00:00:00.000Z)
+  datetime_end: String # AWS DateTime format, in UTC (2022-12-26T00:00:00.000Z)
 }
 
 # Helper entity for getting makertAddress from Ilk
