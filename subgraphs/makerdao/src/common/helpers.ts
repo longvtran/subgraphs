@@ -312,6 +312,7 @@ export function updateUsageMetrics(
     if (dailyActiveAccount == null) {
       dailyActiveAccount = new ActiveAccount(dailyActiveAccountId);
       dailyActiveAccount.account_id = accountID;
+      dailyActiveAccount.granularity = "1_day";
       dailyActiveAccount.datetime_start = datetime_start;
       dailyActiveAccount.datetime_end = datetime_end;
       dailyActiveAccount.save();
